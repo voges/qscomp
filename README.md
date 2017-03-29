@@ -4,7 +4,7 @@
 
 ---
 
-This is the official repository for the development of the QScomp software. It is hosted at Bitbucket (https://bitbucket.org/voges/QScomp).
+This is the official repository for the development of the QScomp software. It is hosted at Bitbucket (https://bitbucket.org/voges/qscomp).
 
 ## Build instructions
 
@@ -16,7 +16,7 @@ QScomp has been tested on the following systems:
 
 Clone the QScomp repository with
 
-    git clone https://bitbucket.org/voges/QScomp.git
+    git clone https://bitbucket.org/voges/qscomp.git
 
 Build the executable from the command line with the Bash script ``build.sh``.
 
