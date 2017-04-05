@@ -6,6 +6,8 @@
 //  Copyright © 2017 muhammed oguzhan kulekci. All rights reserved.
 //
 
+// cl /EHsc /W4 main2.cpp /link /out:qscomp2
+
 #include <iostream>
 #include <fstream>
 #include <math.h>
