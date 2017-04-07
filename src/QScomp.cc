@@ -62,14 +62,21 @@ int main(int argc, const char * argv[])
             throw std::exception("Usage: QScomp input.qual");
         }
 
+        // Input file
         std::string inputFileName(argv[1]);
-
         if (!file_exists(inputFileName)) {
             throw std::exception("Input file does not exist");
         }
-
         std::ifstream(inputFileName);
 
+        // dim1 file
+        std::string dim1FileName(inputFileName + ".dim1");
+        if (file_exists(dim1FileName)) {
+            throw std::exception("dim1 file already exists");
+        }
+        std::ofstream dim1(dim1FileName);
+
+        // dim2 files
 
     //ofstream out;
     //char outname[MAXFILENAMELENGTH] = { 0 };
