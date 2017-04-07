@@ -1,5 +1,5 @@
 //
-//  main.cpp
+//  QScomp.cc
 //  QScomp
 //
 //  Created by Muhammed Oguzhan Kulekci on 2017-03-10.
@@ -11,56 +11,65 @@
 // orig: original quality values
 // dim1: nearest sqrt base (e.g. qv=34 -> nearest_qv=36 -> dim1=6)
 // dim2.x: position of original QV in the list of ordered QVs belonging to dim1=x
-// 
+//
 // dim1^2 = nearest_qv
-// 0   ^2    =   0
-// 1   ^2    =   1
-// // 2   ^2    =   4
-// 4   ^2    =   8
-// 5   ^2    =  16
-// 6   ^2    =  36
-// 7   ^2    =  49
-// 8   ^2    =  64
-// 9   ^2    =  81
+//  0   ^2    =   0
+//  1   ^2    =   1
+//  2   ^2    =   4
+//  4   ^2    =   8
+//  5   ^2    =  16
+//  6   ^2    =  36
+//  7   ^2    =  49
+//  8   ^2    =  64
+//  9   ^2    =  81
 // 10   ^2    = 100
 // 11   ^2    = 121
 // 12   ^2    = 144
-// 
+//
 // We recommend compression of the *dim1 and *dim2.x files with bzip2 -9.
-// 
+//
 // Lossy compression ratio: CR_lossy = 8 * size(original) / size(dim1.bz2)
 // Lossless compression ratio: CR_lossless = CR_lossy + size(dim2.x.bz2)
-// 
+//
+// Build on the Windows Developer Command Line with:
+//   cl /EHsc /W4 main2.cpp /link /out:qscomp2
+//
 
-// 
-// cl /EHsc /W4 main2.cpp /link /out:qscomp2
-// 
+//#include <math.h>
 
-#include <iostream>
 #include <fstream>
-#include <math.h>
-#include <string.h>
+#include <iostream>
+#include <string>
 
-#define MAXDIM2FILE 13
-#define MAXFILENAMELENGTH 1024
-#define MAXQS 128 //QS values are printable chars
-#define MAXDIM1 13 // maximum value of dim1 is 11
-#define DIM2BFRLENGTH 65536 // buffering for better file I/O
-#define LINEBFRLENGTH 16384
+//#define MAXDIM2FILE 13
+//#define MAXFILENAMELENGTH 1024
+//#define MAXQS 128 //QS values are printable chars
+//#define MAXDIM1 13 // maximum value of dim1 is 11
+//#define DIM2BFRLENGTH 65536 // buffering for better file I/O
+//#define LINEBFRLENGTH 16384
 
-using namespace std;
-
-void print_usage(void) {
-    std::cout << "Usage: " << std::endl;
+bool file_exists(const std::string &path)
+{
+    if (path.empty()) return false;
+    std::ifstream ifs(path.c_str());
+    return ifs.good();
 }
 
-int main(int argc, const char * argv[]) {
+int main(int argc, const char * argv[])
+{
+    try {
+        if (argc != 2) {
+            throw std::exception("Usage: QScomp input.qual");
+        }
 
-    if (argc < 2) {
-        print_usage();
-    }
+        std::string inputFileName(argv[1]);
 
-    ifstream in(argv[1]);
+        if (!file_exists(inputFileName)) {
+            throw std::exception("Input file does not exist");
+        }
+
+        std::ifstream(inputFileName);
+
 
     //ofstream out;
     //char outname[MAXFILENAMELENGTH] = { 0 };
@@ -202,7 +211,15 @@ int main(int argc, const char * argv[]) {
             remove(outname3);
     }*/
 
+    }
+    catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch (...) {
+        std::cerr << "Unkown error occured" << std::endl;
+        return EXIT_FAILURE;
+    }
 
-
-    return 0;
+    return EXIT_SUCCESS;
 }
