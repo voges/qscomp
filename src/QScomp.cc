@@ -6,14 +6,14 @@
 //  Copyright © 2017 Muhammed Oguzhan Kulekci. All rights reserved.
 //
 
+//
 // Algorithm description:
 // ----------------------
-// orig: original quality values
-// dim1: nearest sqrt base (e.g. qv=34 -> nearest_qv=36 -> dim1=6)
-// dim1_rc: reconstructed sqrt bases (e.g. qv=34 -> nearest_qv=reconstructed_qv=36)
-// dim2.x: position of original QV in the list of ordered QVs belonging to dim1=x
+// dim1: nearest sqrt base (e.g. qs=34 -> nearest_qs=36 -> dim1=6)
+// dim1_rc: reconstructed sqrt bases (e.g. qs=34 -> nearest_qs=reconstructed_qs=36)
+// dim2.x: position of original QS in the list of ordered QSs belonging to dim1=x
 //
-// dim1^2 = nearest_qv
+// dim1^2 = nearest_qs
 //  0   ^2    =   0
 //  1   ^2    =   1
 //  2   ^2    =   4
@@ -35,6 +35,7 @@
 // Build on the Windows Developer Command Line with:
 //   cl /EHsc /W4 main2.cpp /link /out:qscomp2
 //
+//
 
 #include <fstream>
 #include <iostream>
@@ -45,17 +46,19 @@
 #define DIM2_MAX 11
 #define DIM2_RANGE (DIM2_MAX - DIM2_MIN + 1)
 
-// Maximum quality score line length
+// Maximum QS line length
 #define LINE_LEN_MAX 16384
 
-// Quality scores are printable chars and thus in the range [33,126]
+// QS are printable chars and thus in the range [33,126]
 #define QS_MIN 33
 #define QS_MAX 126
 #define QS_RANGE (QS_MAX - QS_MIN + 1)
 
 bool file_exists(const std::string &path)
 {
-    if (path.empty()) return false;
+    if (path.empty()) {
+        return false;
+    }
     std::ifstream ifs(path);
     return ifs.good();
 }
@@ -64,8 +67,9 @@ bool file_isempty(const std::string &path)
 {
     if (path.empty()) return false;
     std::ifstream ifs(path);
-    if (ifs.peek() == std::ifstream::traits_type::eof())
+    if (ifs.peek() == std::ifstream::traits_type::eof()) {
         return true;
+    }
     return false;
 }
 
@@ -90,8 +94,8 @@ int main(int argc, const char * argv[])
         if (!file_exists(inputFileName)) {
             throw std::exception("Input file does not exist");
         }
-        std::streampos in_size = file_size(inputFileName);
-        std::cout << "Input file size: " << in_size << std::endl;
+        std::streampos inputFileSize = file_size(inputFileName);
+        std::cout << "Input file size: " << inputFileSize << std::endl;
         std::ifstream in(inputFileName);
 
         // dim1 file
@@ -143,6 +147,8 @@ int main(int argc, const char * argv[])
         }
 
         char line[LINE_LEN_MAX];
+        size_t lineCnt = 0;
+
         while (in.getline(line, LINE_LEN_MAX)) {
             size_t lineLen = strlen(line);
 
@@ -164,7 +170,11 @@ int main(int argc, const char * argv[])
 
             dim1_rc << '\n';
 
-            std::cout << "Processed " << (100 * (double)in.tellg() / (double)in_size) << "%" << std::endl;
+            lineCnt++;
+            if (lineCnt % 2 == 0) {
+                std::cout << "Processed " << (100 * (double)in.tellg() / (double)inputFileSize) << "%" << std::endl;
+            }
+            //std::cout << "Processed " << lineCnt << " lines" << std::endl;
         }
 
         // Remove empty dim2 files
