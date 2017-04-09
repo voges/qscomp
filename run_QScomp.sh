@@ -28,7 +28,7 @@ QScomp="/home/voges/git/QScomp/build/QScomp"
 time="/usr/bin/time"
 
 # Python scripts
-ps_mem_py="/home/voges/git/QScomp/ps_mem.py"
+#ps_mem_py="/home/voges/git/QScomp/ps_mem.py"
 replace_qual_sam_py="/home/voges/git/ngstools/replace_qual_sam.py"
 xtract_qual_sam_py="/home/voges/git/ngstools/xtract_qual_sam.py"
 
@@ -38,7 +38,7 @@ if [ ! -x $pgrep ]; then printf "did not find $pgrep\n"; exit -1; fi
 if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
 if [ ! -x $QScomp ]; then printf "did not find $QScomp\n"; exit -1; fi
 if [ ! -x $time ]; then printf "did not find $time\n"; exit -1; fi
-if [ ! -e $ps_mem_py ]; then printf "did not find $ps_mem_py\n"; exit -1; fi
+#if [ ! -e $ps_mem_py ]; then printf "did not find $ps_mem_py\n"; exit -1; fi
 if [ ! -e $replace_qual_sam_py ]; then printf "did not find $replace_qual_sam_py\n"; exit -1; fi
 if [ ! -e $xtract_qual_sam_py ]; then printf "did not find $xtract_qual_sam_py\n"; exit -1; fi
 printf "OK\n"
