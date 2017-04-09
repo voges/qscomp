@@ -3,7 +3,7 @@
 //  QScomp
 //
 //  Created by Muhammed Oguzhan Kulekci on 2017-03-10.
-//  Copyright © 2017 Muhammed Oguzhan Kulekci. All rights reserved.
+//  Copyright (c) 2017 Muhammed Oguzhan Kulekci. All rights reserved.
 //
 
 //
@@ -110,7 +110,7 @@ int main(int argc, const char * argv[])
 
         // dim2 files
         std::vector<std::string> dim2FileNames;
-	std::ofstream dim2[DIM2_RANGE];
+        std::ofstream dim2[DIM2_RANGE];
         // The quality scores are printable chars smaller than 128. Thus largest a is actually 11 as 128 = 11*11 +7
         for (int i = 0; i < DIM2_RANGE; i++) {
             std::string dim2FileName(inputFileName + ".dim2." + std::to_string(i));
