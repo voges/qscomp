@@ -10,6 +10,7 @@
 // ----------------------
 // orig: original quality values
 // dim1: nearest sqrt base (e.g. qv=34 -> nearest_qv=36 -> dim1=6)
+// dim1_rc: reconstructed sqrt bases (e.g. qv=34 -> nearest_qv=reconstructed_qv=36)
 // dim2.x: position of original QV in the list of ordered QVs belonging to dim1=x
 //
 // dim1^2 = nearest_qv
@@ -51,7 +52,11 @@
 
 #define DIM2_MIN 0
 #define DIM2_MAX 13
+#define DIM2_RANGE (DIM2_MAX - DIM2_MIN + 1)
 #define LINE_LENGTH_MAX 16384
+#define QS_MIN 1
+#define QS_MAX 128
+#define QS_RANGE (QS_MAX - QS_MIN + 1)
 
 bool file_exists(const std::string &path)
 {
@@ -92,9 +97,18 @@ int main(int argc, const char * argv[])
         }
         std::ofstream dim1(dim1FileName);
 
+        // dim1_rc file
+        std::string dim1_rcFileName(inputFileName + ".dim1_rc");
+        std::cout << "Opening dim1_rc file " << dim1_rcFileName << std::endl;
+        if (file_exists(dim1_rcFileName)) {
+            throw std::exception("dim1_rc file already exists");
+        }
+        std::ofstream dim1_rc(dim1_rcFileName);
+
         // dim2 files
         std::vector<std::string> dim2FileNames;
         std::vector<std::ofstream> dim2;
+        // The quality scores are printable chars smaller than 128. Thus largest a is actually 11 as 128 = 11*11 +7
         for (int i = DIM2_MIN; i < DIM2_MAX; i++) {
             std::string dim2FileName(inputFileName + ".dim2." + std::to_string(i));
             std::cout << "Opening dim2 file " << dim2FileName << std::endl;
@@ -105,19 +119,20 @@ int main(int argc, const char * argv[])
             dim2.emplace_back(std::ofstream{ dim2FileName });
         }
 
-        //ofstream outQSdim2[MAXDIM2FILE];// the quality scores are printable chars smaller than  128. Thus largest a is actually 11 as 128 = 11*11 +7
-        //for (int i = 0; i<MAXDIM2FILE; i++) {
-        //    char outname3[MAXFILENAMELENGTH] = { 0 };
-        //    sprintf(outname3, "%s.qs.dim2.%d", argv[1], i);
-        //    outQSdim2[i].open(outname3, ios::trunc | ios::binary);
-        //}
-
         //char dim2bfr[MAXDIM2FILE][DIM2BFRLENGTH];
         //unsigned int dim2bfrptr[MAXDIM2FILE];
         //for (int i = 0; i<MAXDIM2FILE; i++) dim2bfrptr[i] = 0;
 
         //char qsDim1[MAXQS];// any QS value between <a^2-a+1, a^2+a> is represented by qsDim1=a and qsDim2 = QS - (a^2-a+1);
         //char qsDim2[MAXQS];// thus QS = qsDim1^2 - qsDim1 +1 + qsDim2;
+
+
+        char qsDim1[QS_RANGE];
+
+        for (int i = QS_MIN; i < QS_MAX; i++) {
+            char nearestSqrt = (char)round(sqrt((double)i));
+            qsDim1[i] = nearestSqrt;
+        }
 
         //qsDim1[0] = 0;
         //qsDim2[0] = 0;
@@ -127,6 +142,7 @@ int main(int argc, const char * argv[])
         //    qsDim2[i] = i - (qsDim1[i] * qsDim1[i] - qsDim1[i] + 1) + 1;// +1 is to make everything positive integer since sdsl/sca_wt construction does not accept 0 values in the sequence
         //                                                                //cout << i << '\t'<< (int) qsDim1[i] << '\t' << (int) qsDim2[i] << endl;
         //}
+
 
         //unsigned long int qsDim1_stat[MAXDIM1];
         //for (int i = 0; i<MAXDIM1; i++) qsDim1_stat[i] = 0;
@@ -164,31 +180,10 @@ int main(int argc, const char * argv[])
             }
         }
 
-    //for (int i = 0; i<MAXDIM2FILE; i++) {
-    //    outQSdim2[i].write(dim2bfr[i], dim2bfrptr[i]);
-    //    outQSdim2[i].close();
-    //}
-
-
-    // print stats of the dim1 and dim2 values
-   /* unsigned long dim2total[32];
-    for (int i = 0; i<32; i++) dim2total[i] = 0;
-    for (int i = 0; i<16; i++) {
-        if (qsDim1_stat[i]>0) {
-            cout << i << '\t' << qsDim1_stat[i] << '\t';
-            for (int j = 0; j<2 * i; j++) {
-                cout << qsDim2_stat[i][j] << '\t';
-                dim2total[j] += qsDim2_stat[i][j];
-            }
-            cout << endl << endl;
-        }
-    }
-    cout << "\t\t";
-    for (int i = 0; i<32; i++) cout << dim2total[i] << '\t';
-    cout << endl;*/
-    //**************************************************************
-
-
+        //for (int i = 0; i<MAXDIM2FILE; i++) {
+        //    outQSdim2[i].write(dim2bfr[i], dim2bfrptr[i]);
+        //    outQSdim2[i].close();
+        //}
 
         // Remove empty dim2 files
         for (auto const &dim2FileName : dim2FileNames) {
