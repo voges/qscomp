@@ -18,7 +18,12 @@ Clone the QScomp repository with
 
     git clone https://bitbucket.org/voges/qscomp.git
 
-Build the executable from the command line with the Bash script ``build.sh``.
+Build the executable with CMake and the following commands.
+
+    mkdir build
+    cd build
+    cmake ..
+    make
 
 ## Usage examples
 
@@ -27,4 +32,3 @@ TBD
 ## Who do I talk to?
 
 Jan Voges <[voges@tnt.uni-hannover.de](mailto:voges@tnt.uni-hannover.de)>
-
