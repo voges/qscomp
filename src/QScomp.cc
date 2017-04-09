@@ -181,7 +181,7 @@ int main(int argc, const char * argv[])
 
         // Remove empty dim2 files
         for (auto const &dim2FileName : dim2FileNames) {
-            if (file_size(dim2FileName) == 0) {
+            if ((size_t)file_size(dim2FileName) == 0) {
                 std::cout << "Removing empty dim2 file " << dim2FileName << std::endl;
                 if (remove(dim2FileName.c_str()) != 0) {
                     perror("Could not delete file");
