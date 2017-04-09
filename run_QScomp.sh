@@ -71,12 +71,10 @@ printf "OK\n"
 
 printf "Compressing with bzip2 and generating statistics ... "
 $bzip2 -9 -c $input_sam.qual.dim1 > $input_sam.qual.dim1.bz2
-printf "$input_sam.qual.dim.bz2 size: " > $input_sam.QScomp.stats
-wc -c $input_sam.qual.dim1.bz2 >> $input_sam.QScomp.stats
+wc -c $input_sam.qual.dim1.bz2 > $input_sam.QScomp.stats
 
 for f in $input_sam.qual.dim2.*; do
     $bzip2 -9 -c $f > $f.bz2
-    printf "$f.bz2 size: " >> $input_sam.QScomp.stats
     wc -c $f.bz2 >> $input_sam.QScomp.stats;
 done
 printf "OK\n"
