@@ -51,7 +51,7 @@ printf "Extracting quality values from SAM file ... "
 $python $xtract_qual_sam_py $input_sam 2> $input_sam.qual
 printf "OK\n"
 
-printf "Running QScomp ..."
+printf "Running QScomp ... "
 cmd="$QScomp $input_sam.qual"
 $time -v -o $input_sam.QScomp.time $cmd &> $input_sam.QScomp.log
 #time_pid=$!
@@ -69,6 +69,7 @@ printf "OK\n"
 #                                 Statistics                                  #
 ###############################################################################
 
+printf "Compressing with bzip2 and generating statistics ... "
 $bzip2 -9 -c $input_sam.qual.dim1 > $input_sam.qual.dim1.bz2
 printf "$input_sam.qual.dim.bz2 size: " > $input_sam.QScomp.stats
 wc -c $input_sam.qual.dim1.bz2 >> $input_sam.QScomp.stats
@@ -78,12 +79,13 @@ for f in $input_sam.qual.dim2.*; do
     printf "$f.bz2 size: " >> $input_sam.QScomp.stats
     wc -c $f.bz2 >> $input_sam.QScomp.stats;
 done
+printf "OK\n"
 
 ###############################################################################
 #                                   Cleanup                                   #
 ###############################################################################
 
 printf "Cleanup ... "
-#
+rm -f $input_sam.qual
 printf "OK\n";
 
