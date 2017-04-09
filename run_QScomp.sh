@@ -4,7 +4,7 @@
 #                               Command line                                  #
 ###############################################################################
 
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 1 ]; then
     printf "Usage: $0 input_sam\n"
     exit -1
 fi
@@ -21,6 +21,7 @@ printf "OK\n"
 ###############################################################################
 
 # Binaries
+bzip2="/usr/bin/bzip2"
 pgrep="/usr/bin/pgrep"
 python="/usr/bin/python"
 QScomp="/home/voges/git/QScomp/build/QScomp"
@@ -32,6 +33,7 @@ replace_qual_sam_py="/home/voges/git/ngstools/replace_qual_sam.py"
 xtract_qual_sam_py="/home/voges/git/ngstools/xtract_qual_sam.py"
 
 printf "Checking executables ... "
+if [ ! -x $bzip2 ]; then printf "did not find $bzip2\n"; exit -1; fi
 if [ ! -x $pgrep ]; then printf "did not find $pgrep\n"; exit -1; fi
 if [ ! -x $python ]; then printf "did not find $python\n"; exit -1; fi
 if [ ! -x $QScomp ]; then printf "did not find $QScomp\n"; exit -1; fi
@@ -52,14 +54,14 @@ printf "OK\n"
 printf "Running QScomp ..."
 cmd="$QScomp $input_sam.qual"
 $time -v -o $input_sam.QScomp.time $cmd &> $input_sam.QScomp.log
-time_pid=$!
-cmd_pid=$($pgrep -P $time_pid)
-printf "Command being traced: \"$cmd\"\n" > $input_sam.QScomp.mem
-$python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_sam.QScomp.mem
+#time_pid=$!
+#cmd_pid=$($pgrep -P $time_pid)
+#printf "Command being traced: \"$cmd\"\n" > $input_sam.QScomp.mem
+#$python $ps_mem_py -t -w 1 --swap -p $cmd_pid >> $input_sam.QScomp.mem
 printf "OK\n"
 
 printf "Constructing new SAM file with QScomp'd quality values ... "
-$python $replace_qual_sam_py $input_sam $input_sam.QScomp.dim1_rc
+$python $replace_qual_sam_py $input_sam $input_sam.qual.dim1_rc
 mv $input_sam.new_qual.sam $input_sam.QScomp.sam
 printf "OK\n"
 

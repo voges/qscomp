@@ -165,7 +165,7 @@ int main(int argc, const char * argv[])
             dim1_rc << '\n';
 
             lineCnt++;
-            if (lineCnt % 10000 == 0) {
+            if (lineCnt % 100000 == 0) {
                 std::cout << "Processed " << (100 * (double)in.tellg() / (double)inputFileSize) << "%" << std::endl;
             }
             //std::cout << "Processed " << lineCnt << " lines" << std::endl;
