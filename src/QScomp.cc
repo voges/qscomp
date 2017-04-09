@@ -27,7 +27,7 @@
 // 11   ^2    = 121
 // 12   ^2    = 144
 //
-// We recommend compression of the *dim1 and *dim2.x files with bzip2 -9.
+// We recommend compression of the *dim1 and the *dim2.x files with bzip2 -9.
 //
 // Lossy compression ratio: CR_lossy = 8 * size(original) / size(dim1.bz2)
 // Lossless compression ratio: CR_lossless = CR_lossy + size(dim2.x.bz2)
@@ -37,6 +37,10 @@
 //
 //
 
+#include <math.h>
+#include <string.h>
+
+#include <stdexcept>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -63,16 +67,6 @@ bool file_exists(const std::string &path)
     return ifs.good();
 }
 
-bool file_isempty(const std::string &path)
-{
-    if (path.empty()) return false;
-    std::ifstream ifs(path);
-    if (ifs.peek() == std::ifstream::traits_type::eof()) {
-        return true;
-    }
-    return false;
-}
-
 std::streampos file_size(const std::string &path)
 {
     std::ifstream ifs(path, std::ios::binary);
@@ -85,14 +79,14 @@ int main(int argc, const char * argv[])
 {
     try {
         if (argc != 2) {
-            throw std::exception("Usage: QScomp input.qual");
+            throw std::runtime_error("Usage: QScomp input.qual");
         }
 
         // in file
         std::string inputFileName(argv[1]);
         std::cout << "Opening input file " << inputFileName << std::endl;
         if (!file_exists(inputFileName)) {
-            throw std::exception("Input file does not exist");
+            throw std::runtime_error("Input file does not exist");
         }
         std::streampos inputFileSize = file_size(inputFileName);
         std::cout << "Input file size: " << inputFileSize << std::endl;
@@ -102,7 +96,7 @@ int main(int argc, const char * argv[])
         std::string dim1FileName(inputFileName + ".dim1");
         std::cout << "Creating dim1 file " << dim1FileName << std::endl;
         if (file_exists(dim1FileName)) {
-            throw std::exception("dim1 file already exists");
+            throw std::runtime_error("dim1 file already exists");
         }
         std::ofstream dim1(dim1FileName, std::ofstream::binary);
 
@@ -110,22 +104,22 @@ int main(int argc, const char * argv[])
         std::string dim1_rcFileName(inputFileName + ".dim1_rc");
         std::cout << "Creating dim1_rc file " << dim1_rcFileName << std::endl;
         if (file_exists(dim1_rcFileName)) {
-            throw std::exception("dim1_rc file already exists");
+            throw std::runtime_error("dim1_rc file already exists");
         }
         std::ofstream dim1_rc(dim1_rcFileName, std::ofstream::binary);
 
         // dim2 files
         std::vector<std::string> dim2FileNames;
-        std::vector<std::ofstream> dim2;
+	std::ofstream dim2[DIM2_RANGE];
         // The quality scores are printable chars smaller than 128. Thus largest a is actually 11 as 128 = 11*11 +7
-        for (int i = DIM2_MIN; i < DIM2_MAX; i++) {
+        for (int i = 0; i < DIM2_RANGE; i++) {
             std::string dim2FileName(inputFileName + ".dim2." + std::to_string(i));
             std::cout << "Creating dim2 file " << dim2FileName << std::endl;
             if (file_exists(dim2FileName)) {
-                throw std::exception("dim2 file already exists");
+                throw std::runtime_error("dim2 file already exists");
             }
+            dim2[i].open(dim2FileName, std::ofstream::binary);
             dim2FileNames.push_back(dim2FileName);
-            dim2.emplace_back(std::ofstream{ dim2FileName, std::ofstream::binary });
         }
 
         // Any QS between [a^2-a+1, a^2+a] is represented by qsDim1 = a and qsDim2 = QS - (a^2-a+1);
@@ -159,10 +153,10 @@ int main(int argc, const char * argv[])
                 char d1 = qsDim1[qs];
                 dim1.write((const char *)&d1, 1);
                 //std::cout << "dim1=" << (int)d1 << '\t';
-                
+
                 dim1_rc << (char)(d1 * d1);
                 //std::cout << "dim1_rc=" << (char)(d1 * d1) << "=" << (int)(d1 * d1) << '\t';
-                
+
                 char d2 = qsDim2[qs];
                 dim2[d1].write((const char *)&d2, 1);
                 //std::cout << "dim2[" << (int)d1 << "]=" << (int)d2 << std::endl;
@@ -171,15 +165,23 @@ int main(int argc, const char * argv[])
             dim1_rc << '\n';
 
             lineCnt++;
-            if (lineCnt % 2 == 0) {
+            if (lineCnt % 10000 == 0) {
                 std::cout << "Processed " << (100 * (double)in.tellg() / (double)inputFileSize) << "%" << std::endl;
             }
             //std::cout << "Processed " << lineCnt << " lines" << std::endl;
         }
 
+        // Close all files
+        in.close();
+        dim1.close();
+        dim1_rc.close();
+        for (int i = DIM2_MIN; i < DIM2_MAX; i++) {
+            dim2[i].close();
+        }
+
         // Remove empty dim2 files
         for (auto const &dim2FileName : dim2FileNames) {
-            if (file_isempty(dim2FileName)) {
+            if (file_size(dim2FileName) == 0) {
                 std::cout << "Removing empty dim2 file " << dim2FileName << std::endl;
                 if (remove(dim2FileName.c_str()) != 0) {
                     perror("Could not delete file");
@@ -187,7 +189,7 @@ int main(int argc, const char * argv[])
             }
         }
     }
-    catch (const std::exception &e) {
+    catch (const std::runtime_error &e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
