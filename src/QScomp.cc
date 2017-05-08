@@ -1,17 +1,22 @@
-//
-//  QScomp.cc
-//  QScomp
-//
-//  Created by Muhammed Oguzhan Kulekci on 2017-03-10.
-//  Copyright (c) 2017 Muhammed Oguzhan Kulekci. All rights reserved.
-//
+/** @file QScomp.cc
+ *  @brief This file contains the QScomp source code.
+ *  @author Jan Voges
+ *  @author Muhammed Oguzhan Kulekci
+ *  @bug No known bugs
+ */
+
+// Copyright (c) 2017, Leibniz Universitaet Hannover (LUH), Institut fuer
+// Informationsverarbeitung (TNT)
 
 //
 // Algorithm description:
 // ----------------------
-// dim1: nearest sqrt base (e.g. qs=34 -> nearest_qs=36 -> dim1=6)
-// dim1_rc: reconstructed sqrt bases (e.g. qs=34 -> nearest_qs=reconstructed_qs=36)
-// dim2.x: position of original QS in the list of ordered QSs belonging to dim1=x
+// dim1:    nearest sqrt base
+//          (e.g. qs=34 -> nearest_qs=36 -> dim1=6)
+// dim1_rc: reconstructed sqrt bases
+//          (e.g. qs=34 -> nearest_qs=reconstructed_qs=36)
+// dim2.x:  position of original QS in the list of ordered QSs belonging
+//          to dim1=x
 //
 // dim1^2 = nearest_qs
 //  0   ^2    =   0
@@ -29,11 +34,13 @@
 //
 // We recommend compression of the *dim1 and the *dim2.x files with bzip2 -9.
 //
-// Lossy compression ratio: CR_lossy = 8 * size(original) / size(dim1.bz2)
-// Lossless compression ratio: CR_lossless = CR_lossy + size(dim2.x.bz2)
+// Lossy compression ratio:
+//     CR_lossy = size(original) / size(dim1.bz2)
+// Lossless compression ratio:
+//     CR_lossless = size(original) / (size(dim1.bz2) + size(dim2.x.bz2))
 //
 // Build on the Windows Developer Command Line with:
-//   cl /EHsc /W4 main2.cpp /link /out:qscomp2
+//   cl /EHsc /W4 main2.cpp /link /out:qscomp
 //
 //
 
@@ -46,20 +53,20 @@
 #include <string>
 #include <vector>
 
-#define DIM2_MIN 0
-#define DIM2_MAX 11
-#define DIM2_RANGE (DIM2_MAX - DIM2_MIN + 1)
-
 // Maximum QS line length
 #define LINE_LEN_MAX 16384
 
-// QS are printable chars and thus in the range [33,126]
+// QSs are printable chars and thus in the range [33,126]
 #define QS_MIN 33
 #define QS_MAX 126
 #define QS_RANGE (QS_MAX - QS_MIN + 1)
 
-bool file_exists(const std::string &path)
-{
+// The largest dim1 value is 11 as 126 = 11*11 +5
+#define DIM2_MIN 0
+#define DIM2_MAX 11
+#define DIM2_RANGE (DIM2_MAX - DIM2_MIN + 1)
+
+bool file_exists(const std::string &path) {
     if (path.empty()) {
         return false;
     }
@@ -67,16 +74,14 @@ bool file_exists(const std::string &path)
     return ifs.good();
 }
 
-std::streampos file_size(const std::string &path)
-{
+std::streampos file_size(const std::string &path) {
     std::ifstream ifs(path, std::ios::binary);
     std::streampos beg = ifs.tellg();
     ifs.seekg(0, std::ios::end);
     return ifs.tellg() - beg;
 }
 
-int main(int argc, const char * argv[])
-{
+int main(int argc, const char * argv[]) {
     try {
         if (argc != 2) {
             throw std::runtime_error("Usage: QScomp input.qual");
@@ -88,7 +93,7 @@ int main(int argc, const char * argv[])
         if (!file_exists(inputFileName)) {
             throw std::runtime_error("Input file does not exist");
         }
-        std::streampos inputFileSize = file_size(inputFileName);
+        double inputFileSize = static_cast<double>(file_size(inputFileName));
         std::cout << "Input file size: " << inputFileSize << std::endl;
         std::ifstream in(inputFileName);
 
@@ -111,9 +116,9 @@ int main(int argc, const char * argv[])
         // dim2 files
         std::vector<std::string> dim2FileNames;
         std::ofstream dim2[DIM2_RANGE];
-        // The quality scores are printable chars smaller than 128. Thus largest a is actually 11 as 128 = 11*11 +7
         for (int i = 0; i < DIM2_RANGE; i++) {
-            std::string dim2FileName(inputFileName + ".dim2." + std::to_string(i));
+            std::string dim2FileName(inputFileName + ".dim2."
+                                     + std::to_string(i));
             std::cout << "Creating dim2 file " << dim2FileName << std::endl;
             if (file_exists(dim2FileName)) {
                 throw std::runtime_error("dim2 file already exists");
@@ -122,22 +127,21 @@ int main(int argc, const char * argv[])
             dim2FileNames.push_back(dim2FileName);
         }
 
-        // Any QS between [a^2-a+1, a^2+a] is represented by qsDim1 = a and qsDim2 = QS - (a^2-a+1);
+        // Any QS between [a^2-a+1, a^2+a] is represented by qsDim1 = a and
+        // qsDim2 = QS - (a^2-a+1) .
         // Thus, QS = qsDim1^2 - qsDim1 + 1 + qsDim2
         char qsDim1[QS_RANGE];
         char qsDim2[QS_RANGE];
 
         qsDim1[0] = 0;
         qsDim2[0] = 0;
-        //std::cout << 0 << '\t' << (int)qsDim1[0] << '\t' << (int)qsDim2[0] << std::endl;
 
         for (int i = 1; i < QS_RANGE; i++) {
-            char nearestSqrt = (char)round(sqrt((double)i));
-            qsDim1[i] = nearestSqrt;
+            double nearestSqrt = round(sqrt(static_cast<double>(i)));
+            qsDim1[i] = static_cast<char>(nearestSqrt);
 
-            // +1 is to make everything positive integer since sdsl/sca_wt construction does not accept 0 values in the sequence
+            // +1 is to make everything positive integer
             qsDim2[i] = i - (qsDim1[i] * qsDim1[i] - qsDim1[i] + 1) + 1;
-            //std::cout << i << '\t'<< (int)qsDim1[i] << '\t' << (int)qsDim2[i] << std::endl;
         }
 
         char line[LINE_LEN_MAX];
@@ -146,29 +150,27 @@ int main(int argc, const char * argv[])
         while (in.getline(line, LINE_LEN_MAX)) {
             size_t lineLen = strlen(line);
 
-            for (int i = 0; i < lineLen; i++) {
-                char qs = line[i];
-                //std::cout << "QS=" << qs << "=" << (int)qs << '\t';
+            for (size_t i = 0; i < lineLen; i++) {
+                int qs = static_cast<int>(line[static_cast<int>(i)]);
 
                 char d1 = qsDim1[qs];
                 dim1.write((const char *)&d1, 1);
-                //std::cout << "dim1=" << (int)d1 << '\t';
 
-                dim1_rc << (char)(d1 * d1);
-                //std::cout << "dim1_rc=" << (char)(d1 * d1) << "=" << (int)(d1 * d1) << '\t';
+                dim1_rc << static_cast<char>(d1 * d1);
 
                 char d2 = qsDim2[qs];
-                dim2[d1].write((const char *)&d2, 1);
-                //std::cout << "dim2[" << (int)d1 << "]=" << (int)d2 << std::endl;
+                dim2[static_cast<int>(d1)].write((const char *)&d2, 1);
             }
 
             dim1_rc << '\n';
 
             lineCnt++;
             if (lineCnt % 100000 == 0) {
-                std::cout << "Processed " << (100 * (double)in.tellg() / (double)inputFileSize) << "%" << std::endl;
+                double currFilePos = static_cast<double>(in.tellg());
+                double processed = 100 * currFilePos / inputFileSize;
+                std::cout << "Processed " << processed << "%" << std::endl;
             }
-            //std::cout << "Processed " << lineCnt << " lines" << std::endl;
+            // std::cout << "Processed " << lineCnt << " lines" << std::endl;
         }
 
         // Close all files
@@ -182,7 +184,8 @@ int main(int argc, const char * argv[])
         // Remove empty dim2 files
         for (auto const &dim2FileName : dim2FileNames) {
             if ((size_t)file_size(dim2FileName) == 0) {
-                std::cout << "Removing empty dim2 file " << dim2FileName << std::endl;
+                std::cout << "Removing empty dim2 file ";
+                std::cout  << dim2FileName << std::endl;
                 if (remove(dim2FileName.c_str()) != 0) {
                     perror("Could not delete file");
                 }
