@@ -67,9 +67,6 @@
 #define DIM2_RANGE (DIM2_MAX - DIM2_MIN + 1)
 
 bool file_exists(const std::string &path) {
-    if (path.empty()) {
-        return false;
-    }
     std::ifstream ifs(path);
     return ifs.good();
 }
