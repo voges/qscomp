@@ -2,7 +2,6 @@
  *  @brief This file contains the QScomp source code.
  *  @author Jan Voges
  *  @author Muhammed Oguzhan Kulekci
- *  @bug No known bugs
  */
 
 // Copyright (c) 2017, Leibniz Universitaet Hannover (LUH), Institut fuer
@@ -11,12 +10,13 @@
 //
 // Algorithm description:
 // ----------------------
-// dim1:    nearest sqrt base
-//          (e.g. qs=34 -> nearest_qs=36 -> dim1=6)
-// dim1_rc: reconstructed sqrt bases
-//          (e.g. qs=34 -> nearest_qs=reconstructed_qs=36)
-// dim2.x:  position of original QS in the list of ordered QSs belonging
-//          to dim1=x
+// dim1:      nearest sqrt base
+//            (e.g. qs=34 -> nearest_qs=36 -> dim1=6)
+// dim1_rc:   reconstructed sqrt bases
+//            (e.g. qs=34 -> nearest_qs=reconstructed_qs=36)
+// dim2.x:    positions of original QSs in the list of ordered QSs belonging
+//            to dim1=x
+// dim2_a:    all positions of original QSs in all lists of ordered QSs
 //
 // dim1^2 = nearest_qs
 //  0   ^2    =   0
@@ -124,6 +124,14 @@ int main(int argc, const char * argv[]) {
             dim2FileNames.push_back(dim2FileName);
         }
 
+        // dim2_a file
+        std::string dim2_aFileName(inputFileName + ".dim2_a");
+        std::cout << "Creating dim2_a file " << dim2_aFileName << std::endl;
+        if (file_exists(dim2_aFileName)) {
+            throw std::runtime_error("dim2_a file already exists");
+        }
+        std::ofstream dim2_a(dim2_aFileName, std::ofstream::binary);
+
         // Any QS between [a^2-a+1, a^2+a] is represented by qsDim1 = a and
         // qsDim2 = QS - (a^2-a+1) .
         // Thus, QS = qsDim1^2 - qsDim1 + 1 + qsDim2
@@ -157,6 +165,7 @@ int main(int argc, const char * argv[]) {
 
                 char d2 = qsDim2[qs];
                 dim2[static_cast<int>(d1)].write((const char *)&d2, 1);
+                dim2_a.write((const char *)&d2, 1);
             }
 
             dim1_rc << '\n';
@@ -177,6 +186,7 @@ int main(int argc, const char * argv[]) {
         for (int i = DIM2_MIN; i < DIM2_MAX; i++) {
             dim2[i].close();
         }
+        dim2_a.close();
 
         // Remove empty dim2 files
         for (auto const &dim2FileName : dim2FileNames) {
