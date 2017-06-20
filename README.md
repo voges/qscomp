@@ -48,7 +48,7 @@ Compression of the quality scores can then be performed with the following comma
         bzip2 -9 -c $f > $f.bz2
     done
 
-QScomp produces the file ``file.qual.dim1`` which contains the lossy representation of the quality scores. The file ``file.qual.dim1_rc`` contains the reconstructed quality scores. The files ``file.qual.dim2.*`` contain the necessary information for the lossless reconstruction of the quality scores.
+QScomp produces the file ``file.qual.dim1`` which contains the lossy representation of the quality scores. The file ``file.qual.dim1_rc`` contains the reconstructed quality scores. The files ``file.qual.dim2.*`` contain the necessary information for the lossless reconstruction of the quality scores. The file ``file.qual.dim2_a`` contains all quality scores residues (i.e., all data from the files ``file.qual.dim2.*``).
 
 Finally, a SAM file containing the reconstructed quality scores can be produced with the Python script ``replace_qual_sam.py`` from the **ngstools** repository (see https://github.com/voges/ngstools or https://bitbucket.org/voges/ngstools).
 
