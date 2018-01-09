@@ -4,9 +4,6 @@
  *  @author Muhammed Oguzhan Kulekci
  */
 
-// Copyright (c) 2017, Leibniz Universitaet Hannover (LUH), Institut fuer
-// Informationsverarbeitung (TNT)
-
 //
 // Algorithm description:
 // ----------------------
@@ -38,10 +35,6 @@
 //     CR_lossy = size(original) / size(dim1.bz2)
 // Lossless compression ratio:
 //     CR_lossless = size(original) / (size(dim1.bz2) + size(dim2.x.bz2))
-//
-// Build on the Windows Developer Command Line with:
-//   cl /EHsc /W4 main2.cpp /link /out:qscomp
-//
 //
 
 #include <math.h>

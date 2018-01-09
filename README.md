@@ -36,9 +36,9 @@ This generates a QScomp executable named ``QScomp`` in the ``build`` folder.
 
 QScomp compresses quality scores extracted from e.g. a FASTQ, SAM, or BAM file.
 
-The quality scores can e.g. be extracted from a SAM file with the Python script ``xtract_qual_sam.py`` from the **ngstools** repository (see https://github.com/voges/ngstools or https://bitbucket.org/voges/ngstools).
+The quality scores can e.g. be extracted from a SAM file with the Python script ``xtract_field_sam.py``. This and other supplementary scripts can be found in the folder ``src/ngstools``.
 
-    python xtract_qual_sam.py file.sam 2> file.qual
+    python xtract_field_sam.py file.sam 10 1> file.qual
 
 Compression of the quality scores can then be performed with the following commands.
 
@@ -50,11 +50,11 @@ Compression of the quality scores can then be performed with the following comma
 
 QScomp produces the file ``file.qual.dim1`` which contains the lossy representation of the quality scores. The file ``file.qual.dim1_rc`` contains the reconstructed quality scores. The files ``file.qual.dim2.*`` contain the necessary information for the lossless reconstruction of the quality scores. The file ``file.qual.dim2_a`` contains all quality scores residues (i.e., all data from the files ``file.qual.dim2.*``).
 
-Finally, a SAM file containing the reconstructed quality scores can be produced with the Python script ``replace_qual_sam.py`` from the **ngstools** repository (see https://github.com/voges/ngstools or https://bitbucket.org/voges/ngstools).
+Finally, a SAM file containing the reconstructed quality scores can be produced with the Python script ``replace_qual_sam.py``.
 
-    python replace_qual_sam.py file.sam file.qual.dim1_rc
+    python replace_qual_sam.py file.sam file.qual.dim1_rc 1> file.recon_qual.sam
 
-This produces a new SAM file ``file.sam.new_qual.sam`` which contains the reconstructed quality scores.
+This produces a new SAM file ``file.recon_qual.sam`` which contains the reconstructed quality scores.
 
 ## Who do I talk to?
 
