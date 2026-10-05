@@ -1,16 +1,16 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 11)
 
 # Set up project-specific variables
-set(PROJECT_NAME "QScomp")
+set(PROJECT_NAME "qscomp")
 project(${PROJECT_NAME})
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 0)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR})
 set(PROJECT_BUILD_DIR ${CMAKE_BINARY_DIR})
-set(PROJECT_SOURCE_DIR ${PROJECT_ROOT_DIR}/src/QScomp)
-set(PROJECT_INCLUDE_DIR ${PROJECT_ROOT_DIR}/src/QScomp)
+set(PROJECT_SOURCE_DIR ${PROJECT_ROOT_DIR}/src/qscomp)
+set(PROJECT_INCLUDE_DIR ${PROJECT_ROOT_DIR}/src/qscomp)
 
 # Get all source and header files (C and C++)
 file(GLOB_RECURSE C_SOURCE_FILES ${PROJECT_SOURCE_DIR}/*.c)
@@ -76,4 +76,3 @@ endif ()
 include_directories(${PROJECT_BUILD_DIR})
 include_directories(${PROJECT_INCLUDE_DIR})
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES} ${PROJECT_HEADER_FILES})
-
