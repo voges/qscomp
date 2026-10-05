@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ###############################################################################
 #                               Command line                                  #
@@ -19,14 +19,14 @@ if [ ! -f $input_sam ]; then printf "Error: Input SAM file $input_sam is not a r
 # Binaries
 bzip2="/usr/bin/bzip2"
 gzip="/usr/bin/gzip"
-python="/usr/bin/python"
-QScomp="/home/voges/git/QScomp/build/QScomp"
+python="/usr/bin/python3"
+QScomp="/Users/janvoges/Code/qscomp/build/QScomp"
 time="/usr/bin/time"
 wc="/usr/bin/wc"
 
 # Python scripts
-replace_qual_sam_py="/home/voges/git/QScomp/src/ngstools/replace_qual_sam.py"
-xtract_field_sam_py="/home/voges/git/QScomp/src/ngstools/xtract_field_sam.py"
+replace_qual_sam_py="/Users/janvoges/Code/qscomp/scripts/replace_qual_sam.py"
+xtract_field_sam_py="/Users/janvoges/Code/qscomp/scripts/xtract_field_sam.py"
 
 if [ ! -x $bzip2 ]; then printf "Error: Binary file $bzip2 is not executable.\n"; exit -1; fi
 if [ ! -x $gzip ]; then printf "Error: Binary file $gzip is not executable.\n"; exit -1; fi
@@ -46,8 +46,7 @@ printf "Extracting quality values from SAM file\n"
 $python $xtract_field_sam_py $input_sam 10 1> $input_sam.qual
 
 printf "Running QScomp\n"
-cmd="$QScomp $input_sam.qual"
-$time -v -o $input_sam.QScomp.time $cmd &> $input_sam.QScomp.log
+$time -l $QScomp $input_sam.qual &> $input_sam.QScomp.log
 
 printf "Constructing new SAM file with QScomp'd quality values\n"
 $python $replace_qual_sam_py $input_sam $input_sam.qual.dim1_rc 1> $input_sam.QScomp.sam
@@ -74,13 +73,3 @@ $gzip -c $input_sam.qual > $input_sam.qual.gz
 wc -c $input_sam.qual.gz > $input_sam.gzip.stats
 $bzip2 -9 -c $input_sam.qual > $input_sam.qual.bz2
 wc -c $input_sam.qual.bz2 > $input_sam.bzip2.stats
-
-
-###############################################################################
-#                                   Cleanup                                   #
-###############################################################################
-
-printf "Cleanup\n"
-#rm -f $input_sam.qual
-printf "Done\n";
-
